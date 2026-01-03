@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2048班级无限版 | 专属梗定制✨</title>
+    <title>班级2048无限版 | WASD操控✨</title>
     <style>
         * {margin: 0;padding: 0;box-sizing: border-box;user-select: none;-webkit-user-select: none;}
         body {
@@ -15,7 +15,7 @@
             align-items: center;
             padding: 15px;
         }
-        /* 顶部公告栏 - 滚动显示 */
+        /* 顶部公告栏-固定文案（代码内修改） */
         .notice-bar {
             width: 100%;
             max-width: 500px;
@@ -24,22 +24,13 @@
             background: #ff6b6b;
             color: #fff;
             border-radius: 20px;
-            overflow: hidden;
-            position: relative;
+            text-align: center;
             margin-bottom: 15px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .notice-text {
-            position: absolute;
-            white-space: nowrap;
-            left: 100%;
-            animation: noticeScroll 15s linear infinite;
             font-size: 16px;
             font-weight: bold;
         }
-        @keyframes noticeScroll {0% {left: 100%;} 100% {left: -100%;}}
-
-        /* 头部信息区：分数+重置 */
+        /* 头部：分数+重置按钮 */
         .header {
             width: 100%;
             max-width: 500px;
@@ -69,8 +60,7 @@
             box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
         }
         .btn:hover {transform: scale(1.05);background: #45b7aa;}
-
-        /* 游戏核心面板 */
+        /* 游戏核心面板-4x4网格 */
         .game-container {
             width: 100%;
             max-width: 500px;
@@ -95,8 +85,7 @@
             color: #776e65;
             transition: all 0.2s ease;
         }
-
-        /* 排行榜区域 */
+        /* 班级排行榜-代码内硬改 */
         .rank-box {
             width: 100%;
             max-width: 500px;
@@ -123,13 +112,12 @@
         .rank-item:last-child {border: none;}
         .rank-name {color: #333;font-weight: bold;}
         .rank-score {color: #4ecdc4;font-weight: bold;}
-
-        /* ✅ 核心：隐藏式后台管理面板（默认隐藏，快捷键调出） */
-        .admin-panel {
+        /* ✅ 分数修改弹窗（17c2048按键触发） */
+        .score-modal {
             position: fixed;
             top: 50%;left: 50%;
             transform: translate(-50%, -50%);
-            width: 90%;max-width: 450px;
+            width: 90%;max-width: 400px;
             background: #fff;
             border-radius: 20px;
             padding: 25px;
@@ -137,55 +125,35 @@
             z-index: 9999;
             display: none;
         }
-        .admin-panel h2 {
+        .score-modal h2 {
             color: #ff6b6b;
             text-align: center;
             margin-bottom: 20px;
             font-size: 22px;
         }
-        .admin-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #f0f0f0;
-            padding-bottom: 10px;
-        }
-        .tab-btn {
-            padding: 8px 15px;
-            border: none;
-            background: #f5f5f5;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .tab-btn.active {background: #ff6b6b;color: #fff;}
-        .tab-content {display: none;}
-        .tab-content.active {display: block;}
-        
-        /* 后台表单样式 */
-        .form-item {margin-bottom: 15px;}
-        .form-item label {
+        .score-modal .form-item {margin-bottom: 20px;}
+        .score-modal label {
             display: block;
             color: #333;
             font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        .form-item input, .form-item textarea {
-            width: 100%;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            margin-bottom: 8px;
             font-size: 16px;
-            resize: none;
         }
-        .form-item textarea {height: 80px;}
-        .admin-btn-group {display: flex;gap: 10px;margin-top: 20px;}
-        .save-btn {background: #4ecdc4;color: #fff;}
-        .reset-btn {background: #ff6b6b;color: #fff;}
-        .close-btn {background: #999;color: #fff;}
-
+        .score-modal input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 18px;
+            text-align: center;
+        }
+        .modal-btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-btn-group button {flex: 1;padding: 10px 0;}
+        .confirm-btn {background: #4ecdc4;}
+        .cancel-btn {background: #ff6b6b;}
         /* 遮罩层 */
         .mask {
             position: fixed;
@@ -194,7 +162,12 @@
             z-index: 9998;
             display: none;
         }
-
+        /* 方块配色-适配2的幂次值 */
+        :root {
+            --c2:#eee4da;--c4:#ede0c8;--c8:#f2b179;--c16:#f59563;--c32:#f67c5f;
+            --c64:#f65e3b;--c128:#edcf72;--c256:#edcc61;--c512:#edc850;--c1024:#edc53f;
+            --c2048:#edc22e;--c-max:#3c3a32;--tc-light:#776e65;--tc-dark:#f9f6f2;
+        }
         /* 响应式适配手机 */
         @media (max-width: 500px) {
             .game-container {width: 100%;height: calc(100vw - 30px);}
@@ -207,15 +180,13 @@
     </style>
 </head>
 <body>
-    <!-- 顶部滚动公告栏 -->
-    <div class="notice-bar">
-        <div class="notice-text" id="notice-text">📢 班级2048无限版上线！最高分有奖，欢迎挑战～📢</div>
-    </div>
+    <!-- 公告栏【⭐代码内修改位置1：直接改下面文字即可】 -->
+    <div class="notice-bar">📢 班级2048无限版 | WASD控制方块 | 17c2048改分数 |想上榜截图分数钉钉发谢欣智，半小时延迟哦📢</div>
 
-    <!-- 头部：分数+重置按钮 -->
+    <!-- 头部：分数+重置 -->
     <div class="header">
         <div class="score-box">
-            <h3>班级总分：<span id="score">0</span></h3>
+            <h3>我的分数：<span id="score">0</span></h3>
         </div>
         <button class="btn" id="reset-game">重置游戏 ↺</button>
     </div>
@@ -223,206 +194,194 @@
     <!-- 2048游戏核心区 -->
     <div class="game-container" id="game-container"></div>
 
-    <!-- 班级排行榜 -->
+    <!-- 班级排行榜【⭐代码内修改位置2：直接改<li>里的名字和分数即可】 -->
     <div class="rank-box">
         <h3>🏆 班级高分榜 🏆</h3>
         <ul class="rank-list" id="rank-list">
-            <li class="rank-item"><span class="rank-name">学霸1号</span><span class="rank-score">99999</span></li>
-            <li class="rank-item"><span class="rank-name">卷王之王</span><span class="rank-score">88888</span></li>
-            <li class="rank-item"><span class="rank-name">摸鱼冠军</span><span class="rank-score">66666</span></li>
-            <li class="rank-item"><span class="rank-name">摆烂达人</span><span class="rank-score">55555</span></li>
-            <li class="rank-item"><span class="rank-name">萌新玩家</span><span class="rank-score">12345</span></li>
+            <li class="rank-item"><span class="rank-name">谢欣智</span><span class="rank-score">16384</span></li>
+            <li class="rank-item"><span class="rank-name">暂无</span><span class="rank-score">0</span></li>
+            <li class="rank-item"><span class="rank-name">暂无</span><span class="rank-score">0</span></li>
+            <li class="rank-item"><span class="rank-name">暂无</span><span class="rank-score">0</span></li>
+            <li class="rank-item"><span class="rank-name">暂无</span><span class="rank-score">0</span></li>
         </ul>
     </div>
 
-    <!-- ✅ 后台遮罩层 -->
+    <!-- 遮罩层 -->
     <div class="mask" id="mask"></div>
 
-    <!-- ✅ 后台管理面板（核心功能区） -->
-    <div class="admin-panel" id="admin-panel">
-        <h2>⚙️ 班级2048后台管理</h2>
-        <div class="admin-tabs">
-            <button class="tab-btn active" data-tab="notice">编辑公告</button>
-            <button class="tab-btn" data-tab="rank">编辑排行榜</button>
-            <button class="tab-btn" data-tab="block">编辑方块梗</button>
+    <!-- ✅ 分数修改弹窗（17c2048按键触发） -->
+    <div class="score-modal" id="score-modal">
+        <h2>✏️ 修改我的分数</h2>
+        <div class="form-item">
+            <label>输入目标分数（支持2147483648）</label>
+            <input type="number" id="score-input" placeholder="比如：999999999" min="0">
         </div>
-
-        <!-- 标签1：编辑公告 -->
-        <div class="tab-content active" id="notice-tab">
-            <div class="form-item">
-                <label>公告内容（支持表情包/班级梗）：</label>
-                <textarea id="notice-input" placeholder="输入滚动公告内容，例如：📢 周五班会评比2048冠军！奖品奶茶🥤～">📢 班级2048无限版上线！最高分有奖，欢迎挑战～📢</textarea>
-            </div>
-            <div class="admin-btn-group">
-                <button class="btn save-btn" id="save-notice">保存公告</button>
-                <button class="btn close-btn" id="close-panel">关闭面板</button>
-            </div>
-        </div>
-
-        <!-- 标签2：编辑排行榜 -->
-        <div class="tab-content" id="rank-tab">
-            <div class="form-item">
-                <label>排行榜内容（格式：名字,分数|名字,分数 用|分隔）：</label>
-                <input type="text" id="rank-input" placeholder="示例：学霸1号,99999|卷王之王,88888|摸鱼冠军,66666" value="学霸1号,99999|卷王之王,88888|摸鱼冠军,66666|摆烂达人,55555|萌新玩家,12345">
-            </div>
-            <div class="admin-btn-group">
-                <button class="btn save-btn" id="save-rank">保存排名</button>
-                <button class="btn reset-btn" id="reset-rank">清空排名</button>
-                <button class="btn close-btn">关闭面板</button>
-            </div>
-        </div>
-
-        <!-- 标签3：编辑方块梗（替换默认数字） -->
-        <div class="tab-content" id="block-tab">
-            <div class="form-item">
-                <label>方块内容替换（格式：数字=梗|数字=梗 用|分隔，支持表情/文字）：</label>
-                <input type="text" id="block-input" placeholder="示例：2=摆烂|4=摸鱼|8=卷王|16=学霸|32=学神" value="2=摆烂😴|4=摸鱼🐟|8=卷王💪|16=学霸📚|32=学神👑|64=课代表✨|128=班长🚩|256=班主任👨‍🏫">
-            </div>
-            <div class="admin-btn-group">
-                <button class="btn save-btn" id="save-block">保存梗内容</button>
-                <button class="btn reset-btn" id="reset-block">恢复默认数字</button>
-                <button class="btn close-btn">关闭面板</button>
-            </div>
+        <div class="modal-btn-group">
+            <button class="btn confirm-btn" id="confirm-score">确认修改</button>
+            <button class="btn cancel-btn" id="cancel-score">取消关闭</button>
         </div>
     </div>
 
     <script>
-        // ========== 全局配置 & 核心变量 ==========
+        // ========== 全局核心配置【⭐代码内修改位置3：方块梗/数值配置】 ==========
         const gameContainer = document.getElementById('game-container');
         const scoreDom = document.getElementById('score');
         const resetGameBtn = document.getElementById('reset-game');
-        const noticeTextDom = document.getElementById('notice-text');
-        const rankListDom = document.getElementById('rank-list');
-        const adminPanel = document.getElementById('admin-panel');
+        const scoreModal = document.getElementById('score-modal');
         const mask = document.getElementById('mask');
-        let grid = []; // 游戏网格
+        const scoreInput = document.getElementById('score-input');
+        let grid = []; // 4x4游戏网格
         let score = 0; // 当前分数
-        let blockConfig = { // 默认方块配置（可后台修改）
-            2: '2',4:'4',8:'8',16:'16',32:'32',64:'64',128:'128',256:'256',512:'512',1024:'1024',2048:'2048'
+        const CELL_COUNT = 4; // 固定4x4网格
+        // ✅ 方块配置：严格2的幂次 2/4/8/16...2147483648，可直接改梗内容
+        const BLOCK_CONFIG = {
+            2: '2',4:'4',8:'8',16:'16',32:'32',64:'64',128:'128',256:'256',
+            512:'512',1024:'1024',2048:'2048',4096:'4096',8192:'8192',16384:'16384',
+            32768:'32768',65536:'65536',131072:'131072',262144:'262144',524288:'524288',
+            1048576:'1048576',2097152:'2097152',4194304:'4194304',8388608:'8388608',
+            16777216:'16777216',33554432:'33554432',67108864:'67108864',134217728:'134217728',
+            268435456:'268435456',536870912:'536870912',1073741824:'1073741824',2147483648:'2147483648'
         };
-        const CELL_COUNT = 4; // 4x4网格
-        const CELL_COLOR_MAP = { // 方块配色（适配班级风格）
-            2: '#eee4da',4:'#ede0c8',8:'#f2b179',16:'#f59563',32:'#f67c5f',64:'#f65e3b',
-            128:'#edcf72',256:'#edcc61',512:'#edc850',1024:'#edc53f',2048:'#edc22e',
-            default: '#3c3a32'
+        // ✅ 方块配色映射（匹配2的幂次，最大到2147483648）
+        const CELL_STYLE = {
+            2: {bg: 'var(--c2)', color: 'var(--tc-light)'},
+            4: {bg: 'var(--c4)', color: 'var(--tc-light)'},
+            8: {bg: 'var(--c8)', color: 'var(--tc-dark)'},
+            16: {bg: 'var(--c16)', color: 'var(--tc-dark)'},32: {bg: 'var(--c32)', color: 'var(--tc-dark)'},
+            64: {bg: 'var(--c64)', color: 'var(--tc-dark)'},128: {bg: 'var(--c128)', color: 'var(--tc-dark)'},
+            256: {bg: 'var(--c256)', color: 'var(--tc-dark)'},512: {bg: 'var(--c512)', color: 'var(--tc-dark)'},
+            1024: {bg: 'var(--c1024)', color: 'var(--tc-dark)'},2048: {bg: 'var(--c2048)', color: 'var(--tc-dark)'},
+            default: {bg: 'var(--c-max)', color: 'var(--tc-dark)'}
         };
-        const TEXT_COLOR_MAP = {2:'#776e65',4:'#776e65',default:'#f9f6f2'};
-
-        // ========== ✅ 快捷键调出后台【核心】：按键盘【A+S+D】组合键打开/关闭 ==========
-        let keyPress = [];
-        document.addEventListener('keydown', (e) => {
-            keyPress.push(e.key.toLowerCase());
-            keyPress = keyPress.slice(-3); // 保留最后3个按键
-            if(keyPress.join('') === 'asd') { // 触发组合键
-                adminPanel.style.display = 'block';
-                mask.style.display = 'block';
-                keyPress = [];
-            }
-            // 游戏方向键控制（电脑端）
-            if(['arrowup','arrowdown','arrowleft','arrowright'].includes(e.key)){
-                e.preventDefault();
-                move(e.key);
-            }
-        });
+        // ✅ 分数修改弹窗触发按键：1 →7 →c →2 →0 →4 →8（严格按顺序）
+        const TRIGGER_KEYS = ['1','7','c','2','0','4','8'];
+        let keyCache = []; // 按键缓存
 
         // ========== 初始化游戏 ==========
         window.onload = () => {
-            initLocalData(); // 加载本地存储的配置（公告/排名/方块梗）
-            initGame();      // 初始化游戏网格
-            bindEvents();    // 绑定所有事件
+            initGame();
+            bindAllEvents();
         };
 
-        // ========== 1. 游戏核心逻辑（无限分数版，无上限） ==========
+        // ========== ✅ 核心1：WASD键控制所有方块移动【精准匹配需求】 ==========
+        // W=上  A=左  S=下  D=右，按下对应键所有方块同步移动
+        function bindMoveEvent(e) {
+            const key = e.key.toLowerCase();
+            if(['w','a','s','d'].includes(key)) e.preventDefault(); // 阻止页面滚动
+            switch(key) {
+                case 'w': moveBlock('up'); break;    // W → 所有方块向上移动
+                case 'a': moveBlock('left'); break;  // A → 所有方块向左移动
+                case 's': moveBlock('down'); break;  // S → 所有方块向下移动
+                case 'd': moveBlock('right'); break; // D → 所有方块向右移动
+            }
+        }
+
+        // ========== ✅ 核心2：17c2048按键触发分数修改窗口【精准匹配需求】 ==========
+        function bindTriggerModal(e) {
+            const key = e.key.toLowerCase();
+            keyCache.push(key);
+            keyCache = keyCache.slice(-7); // 只保留最近7个按键，精准匹配长度
+            // 严格匹配按键顺序：1、7、c、2、0、4、8 → 弹出分数窗口
+            if(keyCache.join('') === TRIGGER_KEYS.join('')) {
+                scoreModal.style.display = 'block';
+                mask.style.display = 'block';
+                scoreInput.value = score; // 输入框默认填充当前分数
+                keyCache = []; // 清空缓存，避免重复触发
+            }
+        }
+
+        // ========== 游戏核心逻辑（无限版+标准2幂数值） ==========
         function initGame() {
             grid = Array(CELL_COUNT).fill(0).map(() => Array(CELL_COUNT).fill(0));
             score = 0;
             scoreDom.textContent = score;
-            addRandomCell();
-            addRandomCell();
-            renderGrid();
+            addRandomBlock(); // 初始生成2个方块
+            addRandomBlock();
+            renderGameGrid();
         }
-        // 添加随机方块
-        function addRandomCell() {
+        // 生成随机方块（严格生成2或4，符合原版规则）
+        function addRandomBlock() {
             const emptyCells = [];
-            for(let i=0;i<CELL_COUNT;i++){
-                for(let j=0;j<CELL_COUNT;j++){
-                    if(grid[i][j] === 0) emptyCells.push({x:i,y:j});
+            for(let i=0;i<CELL_COUNT;i++) {
+                for(let j=0;j<CELL_COUNT;j++) {
+                    if(grid[i][j] === 0) emptyCells.push({x:i, y:j});
                 }
             }
             if(emptyCells.length === 0) return;
-            const {x,y} = emptyCells[Math.floor(Math.random()*emptyCells.length)];
-            grid[x][y] = Math.random() > 0.9 ? 4 : 2;
+            const {x,y} = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            grid[x][y] = Math.random() > 0.9 ? 4 : 2; // 90%概率2，10%概率4
         }
-        // 渲染游戏网格
-        function renderGrid() {
+        // 渲染游戏网格（显示方块值/梗）
+        function renderGameGrid() {
             gameContainer.innerHTML = '';
-            for(let i=0;i<CELL_COUNT;i++){
-                for(let j=0;j<CELL_COUNT;j++){
+            for(let i=0;i<CELL_COUNT;i++) {
+                for(let j=0;j<CELL_COUNT;j++) {
                     const cell = document.createElement('div');
                     cell.className = 'cell';
                     const val = grid[i][j];
                     if(val > 0) {
-                        cell.textContent = blockConfig[val] || val; // ✅ 优先显示自定义梗
-                        cell.style.background = CELL_COLOR_MAP[val] || CELL_COLOR_MAP.default;
-                        cell.style.color = TEXT_COLOR_MAP[val] || TEXT_COLOR_MAP.default;
+                        cell.textContent = BLOCK_CONFIG[val] || val;
+                        const style = CELL_STYLE[val] || CELL_STYLE.default;
+                        cell.style.background = style.bg;
+                        cell.style.color = style.color;
                     }
                     gameContainer.appendChild(cell);
                 }
             }
         }
-        // 移动逻辑（上下左右）+ 无限分数累加
-        function move(direction) {
-            let hasChanged = false;
+        // 方块移动+合并逻辑（无限分数，无上限）
+        function moveBlock(direction) {
+            let isGridChanged = false;
             switch(direction) {
-                case 'ArrowUp':
-                    for(let j=0;j<CELL_COUNT;j++){
+                case 'up':
+                    for(let j=0;j<CELL_COUNT;j++) {
                         const col = grid.map(row => row[j]);
-                        const newCol = merge(col);
-                        for(let i=0;i<CELL_COUNT;i++){
-                            if(grid[i][j] !== newCol[i]) hasChanged = true;
+                        const newCol = mergeBlocks(col);
+                        for(let i=0;i<CELL_COUNT;i++) {
+                            if(grid[i][j] !== newCol[i]) isGridChanged = true;
                             grid[i][j] = newCol[i];
                         }
                     }
                     break;
-                case 'ArrowDown':
-                    for(let j=0;j<CELL_COUNT;j++){
+                case 'down':
+                    for(let j=0;j<CELL_COUNT;j++) {
                         const col = grid.map(row => row[j]).reverse();
-                        const newCol = merge(col).reverse();
-                        for(let i=0;i<CELL_COUNT;i++){
-                            if(grid[i][j] !== newCol[i]) hasChanged = true;
+                        const newCol = mergeBlocks(col).reverse();
+                        for(let i=0;i<CELL_COUNT;i++) {
+                            if(grid[i][j] !== newCol[i]) isGridChanged = true;
                             grid[i][j] = newCol[i];
                         }
                     }
                     break;
-                case 'ArrowLeft':
-                    for(let i=0;i<CELL_COUNT;i++){
-                        const newRow = merge(grid[i]);
-                        if(grid[i].join() !== newRow.join()) hasChanged = true;
+                case 'left':
+                    for(let i=0;i<CELL_COUNT;i++) {
+                        const newRow = mergeBlocks(grid[i]);
+                        if(grid[i].join() !== newRow.join()) isGridChanged = true;
                         grid[i] = newRow;
                     }
                     break;
-                case 'ArrowRight':
-                    for(let i=0;i<CELL_COUNT;i++){
-                        const newRow = merge(grid[i].reverse()).reverse();
-                        if(grid[i].join() !== newRow.join()) hasChanged = true;
+                case 'right':
+                    for(let i=0;i<CELL_COUNT;i++) {
+                        const newRow = mergeBlocks(grid[i].reverse()).reverse();
+                        if(grid[i].join() !== newRow.join()) isGridChanged = true;
                         grid[i] = newRow;
                     }
                     break;
             }
-            if(hasChanged) {
-                addRandomCell();
-                renderGrid();
-                // ✅ 无限分数累加（突破2048上限，无封顶）
+            // 移动/合并后生成新方块+更新分数
+            if(isGridChanged) {
+                addRandomBlock();
+                renderGameGrid();
                 scoreDom.textContent = score;
-                localStorage.setItem('2048_last_score', score);
+                localStorage.setItem('class2048_score', score);
             }
         }
-        // 方块合并逻辑
-        function merge(arr) {
+        // 方块合并（严格2的幂次翻倍，无数值上限）
+        function mergeBlocks(arr) {
             const newArr = arr.filter(num => num !== 0);
-            for(let i=0;i<newArr.length-1;i++){
-                if(newArr[i] === newArr[i+1]){
-                    newArr[i] *= 2;
+            for(let i=0;i<newArr.length-1;i++) {
+                if(newArr[i] === newArr[i+1]) {
+                    newArr[i] *= 2; // 翻倍：2→4、4→8...2147483648
                     newArr[i+1] = 0;
                     score += newArr[i]; // 分数累加
                 }
@@ -432,139 +391,56 @@
             return res;
         }
 
-        // ========== 2. 后台核心功能（公告/排行榜/方块梗 编辑+保存） ==========
-        // 初始化本地存储数据
-        function initLocalData() {
-            // 加载公告
-            const saveNotice = localStorage.getItem('2048_notice');
-            if(saveNotice) {
-                noticeTextDom.textContent = saveNotice;
-                document.getElementById('notice-input').value = saveNotice;
-            }
-            // 加载排行榜
-            const saveRank = localStorage.getItem('2048_rank');
-            if(saveRank) renderRankList(saveRank);
-            // 加载方块梗配置
-            const saveBlock = localStorage.getItem('2048_block');
-            if(saveBlock) {
-                blockConfig = parseConfig(saveBlock);
-                document.getElementById('block-input').value = saveBlock;
-            } else {
-                // 默认班级梗配置
-                const defaultBlock = '2=摆烂😴|4=摸鱼🐟|8=卷王💪|16=学霸📚|32=学神👑|64=课代表✨|128=班长🚩|256=班主任👨‍🏫';
-                blockConfig = parseConfig(defaultBlock);
-                document.getElementById('block-input').value = defaultBlock;
-            }
-        }
-        // 解析配置字符串（a=b|c=d → {a:b,c:d}）
-        function parseConfig(str) {
-            const obj = {};
-            str.split('|').forEach(item => {
-                const [k,v] = item.split('=');
-                if(k && v) obj[k] = v;
+        // ========== ✅ 核心3：分数修改弹窗功能（确认生效+关闭） ==========
+        function bindScoreModalEvent() {
+            // 确认修改分数
+            document.getElementById('confirm-score').addEventListener('click', () => {
+                const newScore = parseInt(scoreInput.value.trim());
+                if(!isNaN(newScore) && newScore >= 0) {
+                    score = newScore;
+                    scoreDom.textContent = score;
+                    localStorage.setItem('class2048_score', score);
+                    closeScoreModal();
+                    alert(`分数修改成功！当前分数：${score}`);
+                } else {
+                    alert('请输入有效的数字（≥0）');
+                }
             });
-            return obj;
-        }
-        // 渲染排行榜
-        function renderRankList(str) {
-            const rankData = parseConfig(str);
-            let html = '';
-            Object.entries(rankData).forEach(([name,score]) => {
-                html += `<li class="rank-item"><span class="rank-name">${name}</span><span class="rank-score">${score}</span></li>`;
+            // 取消关闭弹窗
+            document.getElementById('cancel-score').addEventListener('click', closeScoreModal);
+            // 点击遮罩关闭弹窗
+            mask.addEventListener('click', (e) => {
+                if(e.target === mask) closeScoreModal();
             });
-            rankListDom.innerHTML = html;
-            localStorage.setItem('2048_rank', str);
+        }
+        // 关闭分数弹窗
+        function closeScoreModal() {
+            scoreModal.style.display = 'none';
+            mask.style.display = 'none';
+            scoreInput.value = '';
         }
 
-        // ========== 3. 事件绑定（游戏+后台+标签切换） ==========
-        function bindEvents() {
-            // 游戏重置
-            resetGameBtn.addEventListener('click', initGame);
-            // 手机触屏滑动控制
+        // ========== 绑定所有事件（WASD+触发+弹窗+重置+触屏） ==========
+        function bindAllEvents() {
+            document.addEventListener('keydown', bindMoveEvent); // WASD移动
+            document.addEventListener('keydown', bindTriggerModal); // 17c2048触发弹窗
+            bindScoreModalEvent(); // 分数弹窗事件
+            resetGameBtn.addEventListener('click', initGame); // 重置游戏
+            
+            // 手机触屏适配（上下左右滑动，兼容移动端）
             let startX, startY;
             gameContainer.addEventListener('touchstart', (e) => {
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
             });
             gameContainer.addEventListener('touchend', (e) => {
-                const endX = e.changedTouches[0].clientX;
-                const endY = e.changedTouches[0].clientY;
-                const dx = endX - startX;
-                const dy = endY - startY;
-                if(Math.abs(dx) > Math.abs(dy)){
-                    move(dx > 0 ? 'ArrowRight' : 'ArrowLeft');
+                const dx = e.changedTouches[0].clientX - startX;
+                const dy = e.changedTouches[0].clientY - startY;
+                if(Math.abs(dx) > Math.abs(dy)) {
+                    moveBlock(dx > 0 ? 'right' : 'left');
                 } else {
-                    move(dy > 0 ? 'ArrowDown' : 'ArrowUp');
+                    moveBlock(dy > 0 ? 'down' : 'up');
                 }
-            });
-
-            // 后台标签切换
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    btn.classList.add('active');
-                    const tab = btn.dataset.tab;
-                    document.getElementById(`${tab}-tab`).classList.add('active');
-                });
-            });
-
-            // 后台功能：保存公告
-            document.getElementById('save-notice').addEventListener('click', () => {
-                const val = document.getElementById('notice-input').value.trim();
-                if(val) {
-                    noticeTextDom.textContent = val;
-                    localStorage.setItem('2048_notice', val);
-                    alert('公告保存成功！');
-                }
-            });
-            // 后台功能：保存排行榜
-            document.getElementById('save-rank').addEventListener('click', () => {
-                const val = document.getElementById('rank-input').value.trim();
-                if(val) {
-                    renderRankList(val);
-                    alert('排行榜保存成功！');
-                }
-            });
-            // 后台功能：清空排行榜
-            document.getElementById('reset-rank').addEventListener('click', () => {
-                if(confirm('确定清空排行榜？')) {
-                    document.getElementById('rank-input').value = '';
-                    rankListDom.innerHTML = '';
-                    localStorage.removeItem('2048_rank');
-                }
-            });
-            // 后台功能：保存方块梗
-            document.getElementById('save-block').addEventListener('click', () => {
-                const val = document.getElementById('block-input').value.trim();
-                if(val) {
-                    blockConfig = parseConfig(val);
-                    localStorage.setItem('2048_block', val);
-                    renderGrid(); // 实时生效
-                    alert('方块梗配置保存成功！');
-                }
-            });
-            // 后台功能：恢复默认数字方块
-            document.getElementById('reset-block').addEventListener('click', () => {
-                if(confirm('确定恢复默认数字方块？')) {
-                    const defaultStr = '2=2|4=4|8=8|16=16|32=32|64=64|128=128|256=256';
-                    blockConfig = parseConfig(defaultStr);
-                    document.getElementById('block-input').value = defaultStr;
-                    localStorage.setItem('2048_block', defaultStr);
-                    renderGrid();
-                    alert('已恢复默认数字！');
-                }
-            });
-            // 关闭后台面板
-            document.querySelectorAll('.close-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    adminPanel.style.display = 'none';
-                    mask.style.display = 'none';
-                });
-            });
-            mask.addEventListener('click', () => {
-                adminPanel.style.display = 'none';
-                mask.style.display = 'none';
             });
         }
     </script>
