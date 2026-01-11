@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>班级2048✨</title>
+    <title>班级2048 | 按钮操控版✨</title>
     <style>
         * {margin: 0;padding: 0;box-sizing: border-box;user-select: none;-webkit-user-select: none;}
         body {
@@ -15,7 +15,7 @@
             align-items: center;
             padding: 20px 15px;
         }
-        /* 截图同款公告栏 */
+        /* ✅ 修改后公告栏 */
         .notice-bar {
             width: 100%;
             max-width: 500px;
@@ -61,7 +61,7 @@
             transition: all 0.2s;
         }
         .btn:hover {background: #786553;}
-        /* ✅ 新增：5个操控按钮容器（上下左右+管理员）- 双端适配 */
+        /* ✅ 5个操控按钮容器（上下左右+管理员）- 双端适配 */
         .control-btn-group {
             width: 100%;
             max-width: 500px;
@@ -101,7 +101,6 @@
         .control-btn.down {grid-area: down;}
         .control-btn.right {grid-area: right;}
         .control-btn:hover {background: #786553;}
-        .control-btn.admin:hover {background: #ff6060;}
         /* 游戏核心面板 - 无动画样式 */
         .game-container {
             position: relative;
@@ -133,7 +132,7 @@
             font-weight: bold;
             color: #776e65;
         }
-        /* 截图同款排行榜 */
+        /* ✅ 修改后排行榜 */
         .rank-box {
             width: 100%;
             max-width: 500px;
@@ -235,8 +234,8 @@
     </style>
 </head>
 <body>
-    <!-- 【代码修改区1】公告栏 - 直接改文字 -->
-    <div class="notice-bar">📢 想上榜分数截图钉钉发谢欣智 📢</div>
+    <!-- ✅ 已修改公告栏 -->
+    <div class="notice-bar">向上排行榜全屏截屏钉钉转发谢欣智</div>
 
     <!-- 头部：分数展示+重置按钮 -->
     <div class="header">
@@ -247,7 +246,7 @@
         <button class="btn" id="reset-game">重置游戏</button>
     </div>
 
-    <!-- ✅ 新增：5个操控按钮（上下左右+管理员） -->
+    <!-- ✅ 5个操控按钮（上下左右+管理员） -->
     <div class="control-btn-group">
         <button class="control-btn up" id="btn-up">↑ 上</button>
         <button class="control-btn left" id="btn-left">← 左</button>
@@ -261,14 +260,14 @@
         <div class="grid" id="grid"></div>
     </div>
 
-    <!-- 【代码修改区2】排行榜 - 直接改名字/分数 -->
+    <!-- ✅ 已修改排行榜：第一名谢欣智2048，其他暂无0 -->
     <div class="rank-box">
         <h3>🏆 班级高分榜 🏆</h3>
         <ul class="rank-list" id="rank-list">
             <li class="rank-item">
                 <span class="rank-num first">1</span>
                 <span class="rank-name">谢欣智</span>
-                <span class="rank-score">4096</span>
+                <span class="rank-score">2048</span>
             </li>
             <li class="rank-item">
                 <span class="rank-num second">2</span>
@@ -307,21 +306,23 @@
     </div>
 
     <script>
+        // ========== 全局配置【代码修改区3】方块值/梗自定义 ==========
         const gridDom = document.getElementById('grid');
         const scoreDom = document.getElementById('score');
         const resetBtn = document.getElementById('reset-game');
         const scoreModal = document.getElementById('score-modal');
         const mask = document.getElementById('mask');
         const scoreInput = document.getElementById('score-input');
-        const CELL_COUNT = 4; // 
-        let grid = [];       
-        let score = 0;   
+        const CELL_COUNT = 4; // 4x4网格
+        let grid = [];        // 游戏数据网格
+        let score = 0;        // 当前分数
 
-        let isAdminMode = false; 
+        // ✅ 管理员相关配置：点击管理员按钮后，输入17C2048触发（忽略大小写）
+        let isAdminMode = false; // 是否进入管理员输入状态
         const ADMIN_TRIGGER = '17c2048';
-        let adminInputCache = ''; 
+        let adminInputCache = ''; // 管理员输入缓存
 
-    
+        // ✅ 方块配置：2/4/8...2147483648，直接改引号内内容替换成班级梗
         const BLOCK_CONFIG = {
             2: '2',4:'4',8:'8',16:'16',32:'32',64:'64',128:'128',256:'256',
             512:'512',1024:'1024',2048:'2048',4096:'4096',8192:'8192',16384:'16384',
@@ -331,6 +332,7 @@
             268435456:'268435456',536870912:'536870912',1073741824:'1073741824',2147483648:'2147483648'
         };
 
+        // 方块配色&文字色映射（无动画）
         const CELL_STYLE = {
             2: {bg: 'var(--c2)', color: 'var(--tc-light)'},
             4: {bg: 'var(--c4)', color: 'var(--tc-light)'},
@@ -338,10 +340,11 @@
             16: {bg: 'var(--c16)', color: 'var(--tc-dark)'},32: {bg: 'var(--c32)', color: 'var(--tc-dark)'},
             64: {bg: 'var(--c64)', color: 'var(--tc-dark)'},128: {bg: 'var(--c128)', color: 'var(--tc-dark)'},
             256: {bg: 'var(--c256)', color: 'var(--tc-dark)'},512: {bg: 'var(--c512)', color: 'var(--tc-dark)'},
-            1024: {bg: 'var(--c1024)', color: 'var(--tc-dark)'},2048: {bg: 'var(--c2048)', color: 'var(--tc-dark)'},
+            1048: {bg: 'var(--c1024)', color: 'var(--tc-dark)'},2048: {bg: 'var(--c2048)', color: 'var(--tc-dark)'},
             default: {bg: 'var(--c-max)', color: 'var(--tc-dark)'}
         };
 
+        // ========== 初始化游戏 ==========
         window.addEventListener('load', () => {
             initGame();
             bindAllEvents();
@@ -359,6 +362,8 @@
             renderCells();
             localStorage.setItem('class2048_score', 0);
         }
+
+        // ========== 核心：渲染方块（无任何动画） ==========
         function renderCells() {
             gridDom.innerHTML = '';
             for (let row = 0; row < CELL_COUNT; row++) {
@@ -377,6 +382,7 @@
             }
         }
 
+        // ========== ✅ 修复核心：方块移动逻辑（关键修复） ==========
         function moveBlock(direction) {
             let hasChanged = false;
             const newGrid = JSON.parse(JSON.stringify(grid));
@@ -384,26 +390,30 @@
             switch (direction) {
                 case 'up':
                     for (let col = 0; col < CELL_COUNT; col++) {
-                        const merged = mergeColumn(newGrid, col, 'up');
-                        if (merged.changed) hasChanged = true;
+                        const result = processColumn(newGrid, col, 'up');
+                        if (result.changed) hasChanged = true;
+                        score += result.score;
                     }
                     break;
                 case 'down':
                     for (let col = 0; col < CELL_COUNT; col++) {
-                        const merged = mergeColumn(newGrid, col, 'down');
-                        if (merged.changed) hasChanged = true;
+                        const result = processColumn(newGrid, col, 'down');
+                        if (result.changed) hasChanged = true;
+                        score += result.score;
                     }
                     break;
                 case 'left':
                     for (let row = 0; row < CELL_COUNT; row++) {
-                        const merged = mergeRow(newGrid, row, 'left');
-                        if (merged.changed) hasChanged = true;
+                        const result = processRow(newGrid, row, 'left');
+                        if (result.changed) hasChanged = true;
+                        score += result.score;
                     }
                     break;
                 case 'right':
                     for (let row = 0; row < CELL_COUNT; row++) {
-                        const merged = mergeRow(newGrid, row, 'right');
-                        if (merged.changed) hasChanged = true;
+                        const result = processRow(newGrid, row, 'right');
+                        if (result.changed) hasChanged = true;
+                        score += result.score;
                     }
                     break;
             }
@@ -417,11 +427,13 @@
             }
         }
 
-        function mergeRow(grid, rowIdx, direction) {
+        // ========== ✅ 修复核心：行处理逻辑（完全重构） ==========
+        function processRow(grid, rowIdx, direction) {
             let row = grid[rowIdx].filter(num => num !== 0);
             let changed = false;
             let addScore = 0;
 
+            // 合并相同方块
             for (let i = 0; i < row.length - 1; i++) {
                 if (row[i] === row[i + 1]) {
                     row[i] *= 2;
@@ -431,23 +443,39 @@
                 }
             }
 
+            // 移除合并后的空值
             row = row.filter(num => num !== 0);
+            
+            // 根据方向填充空值
             const empty = CELL_COUNT - row.length;
-            if (direction === 'left') row = row.concat(Array(empty).fill(0));
-            else row = Array(empty).fill(0).concat(row);
+            if (direction === 'left') {
+                row = row.concat(Array(empty).fill(0));
+            } else {
+                row = Array(empty).fill(0).concat(row);
+            }
+
+            // 检查是否有变化
+            if (JSON.stringify(grid[rowIdx]) !== JSON.stringify(row)) {
+                changed = true;
+            }
 
             grid[rowIdx] = row;
-            score += addScore;
-            return { changed };
+            return { changed, score: addScore };
         }
 
-        function mergeColumn(grid, colIdx, direction) {
+        // ========== ✅ 修复核心：列处理逻辑（完全重构） ==========
+        function processColumn(grid, colIdx, direction) {
             let col = [];
-            for (let i = 0; i < CELL_COUNT; i++) col.push(grid[i][colIdx]);
-            col = col.filter(num => num !== 0);
+            for (let i = 0; i < CELL_COUNT; i++) {
+                col.push(grid[i][colIdx]);
+            }
             
+            // 过滤空值
+            col = col.filter(num => num !== 0);
             let changed = false;
             let addScore = 0;
+
+            // 合并相同方块
             for (let i = 0; i < col.length - 1; i++) {
                 if (col[i] === col[i + 1]) {
                     col[i] *= 2;
@@ -457,21 +485,42 @@
                 }
             }
 
+            // 移除合并后的空值
             col = col.filter(num => num !== 0);
+            
+            // 根据方向填充空值
             const empty = CELL_COUNT - col.length;
-            if (direction === 'up') col = col.concat(Array(empty).fill(0));
-            else col = Array(empty).fill(0).concat(col);
+            if (direction === 'up') {
+                col = col.concat(Array(empty).fill(0));
+            } else {
+                col = Array(empty).fill(0).concat(col);
+            }
 
-            for (let i = 0; i < CELL_COUNT; i++) grid[i][colIdx] = col[i];
-            score += addScore;
-            return { changed };
+            // 检查是否有变化
+            let originalCol = [];
+            for (let i = 0; i < CELL_COUNT; i++) {
+                originalCol.push(grid[i][colIdx]);
+            }
+            if (JSON.stringify(originalCol) !== JSON.stringify(col)) {
+                changed = true;
+            }
+
+            // 更新列数据
+            for (let i = 0; i < CELL_COUNT; i++) {
+                grid[i][colIdx] = col[i];
+            }
+
+            return { changed, score: addScore };
         }
 
+        // 生成随机方块（2/4）
         function addRandomBlock() {
             const emptyCells = [];
             for (let i = 0; i < CELL_COUNT; i++) {
                 for (let j = 0; j < CELL_COUNT; j++) {
-                    if (grid[i][j] === 0) emptyCells.push({x: i, y: j});
+                    if (grid[i][j] === 0) {
+                        emptyCells.push({x: i, y: j});
+                    }
                 }
             }
             if (emptyCells.length === 0) return;
@@ -479,38 +528,48 @@
             grid[x][y] = Math.random() > 0.9 ? 4 : 2;
         }
 
+        // ========== ✅ 核心：绑定所有按钮+管理员验证逻辑 ==========
         function bindAllEvents() {
+            // 1. 上下左右按钮点击事件（替换WASD，双端通用）
             document.getElementById('btn-up').addEventListener('click', () => moveBlock('up'));
             document.getElementById('btn-left').addEventListener('click', () => moveBlock('left'));
             document.getElementById('btn-down').addEventListener('click', () => moveBlock('down'));
             document.getElementById('btn-right').addEventListener('click', () => moveBlock('right'));
 
+            // 2. 管理员按钮点击事件：进入输入验证状态
             document.getElementById('btn-admin').addEventListener('click', () => {
                 isAdminMode = true;
                 adminInputCache = '';
-                alert('已进入管理员验证状态，请输入密钥触发分数修改窗口（不分大小写）');
+                alert('已进入管理员验证状态，请输入「17C2048」触发分数修改窗口（不分大小写）');
             });
 
+            // 3. 监听输入：管理员模式下输入17C2048触发改分窗口（双端通用）
             document.addEventListener('keydown', (e) => {
                 if (!isAdminMode) return;
                 
+                // 收集输入字符（忽略大小写，只保留有效字符）
                 const key = e.key.toLowerCase();
                 if (/[0-9a-z]/.test(key)) {
                     adminInputCache += key;
+                    // 只保留最近7个字符（匹配17c2048长度）
                     adminInputCache = adminInputCache.slice(-7);
                     
+                    // 验证是否匹配触发码
                     if (adminInputCache === ADMIN_TRIGGER) {
                         scoreModal.style.display = 'block';
                         mask.style.display = 'block';
                         scoreInput.value = score;
+                        // 退出管理员模式，清空缓存
                         isAdminMode = false;
                         adminInputCache = '';
                     }
                 }
             });
 
+            // 4. 重置游戏
             resetBtn.addEventListener('click', initGame);
 
+            // 5. 分数弹窗事件
             document.getElementById('confirm-score').addEventListener('click', () => {
                 const newScore = parseInt(scoreInput.value.trim());
                 if (!isNaN(newScore) && newScore >= 0) {
@@ -526,6 +585,7 @@
             mask.addEventListener('click', (e) => e.target === mask && closeModal());
         }
 
+        // 关闭分数弹窗
         function closeModal() {
             scoreModal.style.display = 'none';
             mask.style.display = 'none';
