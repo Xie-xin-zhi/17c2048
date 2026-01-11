@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>班级2048 | 按钮操控版✨</title>
+    <title>班级2048✨</title>
     <style>
         * {margin: 0;padding: 0;box-sizing: border-box;user-select: none;-webkit-user-select: none;}
         body {
@@ -15,7 +15,7 @@
             align-items: center;
             padding: 20px 15px;
         }
-        /* ✅ 修改后公告栏 */
+        /* 已修改公告栏 */
         .notice-bar {
             width: 100%;
             max-width: 500px;
@@ -61,7 +61,7 @@
             transition: all 0.2s;
         }
         .btn:hover {background: #786553;}
-        /* ✅ 5个操控按钮容器（上下左右+管理员）- 双端适配 */
+        /* 5个操控按钮容器（上下左右+管理员）- 双端适配 */
         .control-btn-group {
             width: 100%;
             max-width: 500px;
@@ -132,7 +132,7 @@
             font-weight: bold;
             color: #776e65;
         }
-        /* ✅ 修改后排行榜 */
+        /* 已修改排行榜 */
         .rank-box {
             width: 100%;
             max-width: 500px;
@@ -176,6 +176,19 @@
         .rank-num.other {background: #888;}
         .rank-name {flex: 1;color: #333;font-weight: 500;}
         .rank-score {color: #ff7f7f;font-weight: bold;margin-left: 15px;}
+        /* ✅ 新增：管理员验证弹窗（带输入框） */
+        .admin-modal {
+            position: fixed;
+            top: 50%;left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;max-width: 400px;
+            background: #fff;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 9999;
+            display: none;
+        }
         /* 分数修改弹窗 */
         .score-modal {
             position: fixed;
@@ -189,13 +202,13 @@
             z-index: 9999;
             display: none;
         }
-        .score-modal h2 {
+        .modal-h2 {
             color: #ff7f7f;
             text-align: center;
             margin-bottom: 25px;
             font-size: 22px;
         }
-        .score-modal input {
+        .modal-input {
             width: 100%;
             padding: 14px;
             border: 1px solid #ddd;
@@ -205,9 +218,9 @@
             margin-bottom: 25px;
         }
         .modal-btn-group {display: flex;gap: 10px;}
-        .modal-btn-group button {flex:1;padding:12px 0;}
-        .confirm-btn {background: #4fc3a1;color: #fff;}
-        .cancel-btn {background: #ff7f7f;color: #fff;}
+        .modal-btn-group button {flex:1;padding:12px 0;border: none;border-radius: 10px;color: #fff;font-weight: bold;}
+        .confirm-btn {background: #4fc3a1;}
+        .cancel-btn {background: #ff7f7f;}
         /* 遮罩层 */
         .mask {
             position: fixed;
@@ -230,12 +243,13 @@
             .rank-item {font-size: 15px;}
             .control-btn {width: 70px;height: 70px;font-size: 16px;}
             .control-btn.admin {height: 50px;font-size: 14px;}
+            .modal-input {font-size: 16px;}
         }
     </style>
 </head>
 <body>
-    <!-- ✅ 已修改公告栏 -->
-    <div class="notice-bar">向上排行榜全屏截屏钉钉转发谢欣智</div>
+    <!-- 已修改公告栏 -->
+    <div class="notice-bar">想上排行榜全屏截屏钉钉转发谢欣智</div>
 
     <!-- 头部：分数展示+重置按钮 -->
     <div class="header">
@@ -246,7 +260,7 @@
         <button class="btn" id="reset-game">重置游戏</button>
     </div>
 
-    <!-- ✅ 5个操控按钮（上下左右+管理员） -->
+    <!-- 5个操控按钮（上下左右+管理员） -->
     <div class="control-btn-group">
         <button class="control-btn up" id="btn-up">↑ 上</button>
         <button class="control-btn left" id="btn-left">← 左</button>
@@ -260,7 +274,7 @@
         <div class="grid" id="grid"></div>
     </div>
 
-    <!-- ✅ 已修改排行榜：第一名谢欣智2048，其他暂无0 -->
+    <!-- 已修改排行榜：第一名谢欣智2048，其他暂无0 -->
     <div class="rank-box">
         <h3>🏆 班级高分榜 🏆</h3>
         <ul class="rank-list" id="rank-list">
@@ -295,34 +309,45 @@
     <!-- 遮罩层 -->
     <div class="mask" id="mask"></div>
 
+    <!-- ✅ 新增：管理员验证弹窗（带输入框） -->
+    <div class="admin-modal" id="admin-modal">
+        <h2 class="modal-h2">🔧 管理员验证</h2>
+        <input type="text" class="modal-input" id="admin-input" placeholder="请输入管理员密钥" autocomplete="off">
+        <div class="modal-btn-group">
+            <button class="confirm-btn" id="admin-confirm">确认验证</button>
+            <button class="cancel-btn" id="admin-cancel">取消关闭</button>
+        </div>
+    </div>
+
     <!-- 分数修改弹窗 -->
     <div class="score-modal" id="score-modal">
-        <h2>✏️ 修改当前分数</h2>
-        <input type="number" id="score-input" placeholder="输入目标分数，例如999999999" min="0">
+        <h2 class="modal-h2">✏️ 修改当前分数</h2>
+        <input type="number" class="modal-input" id="score-input" placeholder="输入目标分数，例如999999999" min="0">
         <div class="modal-btn-group">
-            <button class="btn confirm-btn" id="confirm-score">确认修改</button>
-            <button class="btn cancel-btn" id="cancel-score">取消关闭</button>
+            <button class="confirm-btn" id="score-confirm">确认修改</button>
+            <button class="cancel-btn" id="score-cancel">取消关闭</button>
         </div>
     </div>
 
     <script>
-        // ========== 全局配置【代码修改区3】方块值/梗自定义 ==========
+        // ========== 全局配置 ==========
         const gridDom = document.getElementById('grid');
         const scoreDom = document.getElementById('score');
         const resetBtn = document.getElementById('reset-game');
-        const scoreModal = document.getElementById('score-modal');
         const mask = document.getElementById('mask');
+        // 管理员弹窗元素
+        const adminModal = document.getElementById('admin-modal');
+        const adminInput = document.getElementById('admin-input');
+        // 分数弹窗元素
+        const scoreModal = document.getElementById('score-modal');
         const scoreInput = document.getElementById('score-input');
+        
         const CELL_COUNT = 4; // 4x4网格
         let grid = [];        // 游戏数据网格
         let score = 0;        // 当前分数
+        const ADMIN_PASSWORD = '17c2048'; // 管理员口令（固定）
 
-        // ✅ 管理员相关配置：点击管理员按钮后，输入17C2048触发（忽略大小写）
-        let isAdminMode = false; // 是否进入管理员输入状态
-        const ADMIN_TRIGGER = '17c2048';
-        let adminInputCache = ''; // 管理员输入缓存
-
-        // ✅ 方块配置：2/4/8...2147483648，直接改引号内内容替换成班级梗
+        // 方块配置：2/4/8...2147483648
         const BLOCK_CONFIG = {
             2: '2',4:'4',8:'8',16:'16',32:'32',64:'64',128:'128',256:'256',
             512:'512',1024:'1024',2048:'2048',4096:'4096',8192:'8192',16384:'16384',
@@ -355,8 +380,7 @@
             score = 0;
             scoreDom.textContent = score;
             gridDom.innerHTML = '';
-            isAdminMode = false;
-            adminInputCache = '';
+            clearModalInputs();
             addRandomBlock();
             addRandomBlock();
             renderCells();
@@ -382,7 +406,7 @@
             }
         }
 
-        // ========== ✅ 修复核心：方块移动逻辑（关键修复） ==========
+        // ========== 核心：方块移动逻辑（已修复，正常响应） ==========
         function moveBlock(direction) {
             let hasChanged = false;
             const newGrid = JSON.parse(JSON.stringify(grid));
@@ -427,7 +451,7 @@
             }
         }
 
-        // ========== ✅ 修复核心：行处理逻辑（完全重构） ==========
+        // ========== 行处理逻辑（重构修复） ==========
         function processRow(grid, rowIdx, direction) {
             let row = grid[rowIdx].filter(num => num !== 0);
             let changed = false;
@@ -463,7 +487,7 @@
             return { changed, score: addScore };
         }
 
-        // ========== ✅ 修复核心：列处理逻辑（完全重构） ==========
+        // ========== 列处理逻辑（重构修复） ==========
         function processColumn(grid, colIdx, direction) {
             let col = [];
             for (let i = 0; i < CELL_COUNT; i++) {
@@ -528,67 +552,94 @@
             grid[x][y] = Math.random() > 0.9 ? 4 : 2;
         }
 
-        // ========== ✅ 核心：绑定所有按钮+管理员验证逻辑 ==========
+        // ========== 核心：绑定所有事件（新增管理员输入框验证） ==========
         function bindAllEvents() {
-            // 1. 上下左右按钮点击事件（替换WASD，双端通用）
+            // 1. 上下左右按钮点击事件（双端通用，正常响应）
             document.getElementById('btn-up').addEventListener('click', () => moveBlock('up'));
             document.getElementById('btn-left').addEventListener('click', () => moveBlock('left'));
             document.getElementById('btn-down').addEventListener('click', () => moveBlock('down'));
             document.getElementById('btn-right').addEventListener('click', () => moveBlock('right'));
 
-            // 2. 管理员按钮点击事件：进入输入验证状态
+            // 2. 管理员按钮点击事件：弹出管理员验证弹窗（带输入框）
             document.getElementById('btn-admin').addEventListener('click', () => {
-                isAdminMode = true;
-                adminInputCache = '';
-                alert('已进入管理员验证状态，请输入「17C2048」触发分数修改窗口（不分大小写）');
+                adminModal.style.display = 'block';
+                mask.style.display = 'block';
+                adminInput.focus(); // 自动聚焦输入框，方便输入
             });
 
-            // 3. 监听输入：管理员模式下输入17C2048触发改分窗口（双端通用）
-            document.addEventListener('keydown', (e) => {
-                if (!isAdminMode) return;
-                
-                // 收集输入字符（忽略大小写，只保留有效字符）
-                const key = e.key.toLowerCase();
-                if (/[0-9a-z]/.test(key)) {
-                    adminInputCache += key;
-                    // 只保留最近7个字符（匹配17c2048长度）
-                    adminInputCache = adminInputCache.slice(-7);
-                    
-                    // 验证是否匹配触发码
-                    if (adminInputCache === ADMIN_TRIGGER) {
-                        scoreModal.style.display = 'block';
-                        mask.style.display = 'block';
-                        scoreInput.value = score;
-                        // 退出管理员模式，清空缓存
-                        isAdminMode = false;
-                        adminInputCache = '';
-                    }
+            // 3. 管理员验证 - 确认按钮（输入框验证口令）
+            document.getElementById('admin-confirm').addEventListener('click', () => {
+                const inputValue = adminInput.value.trim().toLowerCase(); // 转为小写，忽略大小写
+                if (inputValue === '') {
+                    alert('请输入管理员口令！');
+                    return;
+                }
+                if (inputValue === ADMIN_PASSWORD) {
+                    // 验证通过：关闭管理员弹窗，弹出分数修改弹窗
+                    adminModal.style.display = 'none';
+                    scoreModal.style.display = 'block';
+                    scoreInput.value = score; // 填充当前分数
+                    scoreInput.focus();
+                } else {
+                    alert('管理员口令错误！请重新输入');
+                    adminInput.value = '';
+                    adminInput.focus();
                 }
             });
 
-            // 4. 重置游戏
-            resetBtn.addEventListener('click', initGame);
+            // 4. 管理员验证 - 取消按钮
+            document.getElementById('admin-cancel').addEventListener('click', () => {
+                closeAdminModal();
+            });
 
-            // 5. 分数弹窗事件
-            document.getElementById('confirm-score').addEventListener('click', () => {
+            // 5. 分数修改 - 确认按钮
+            document.getElementById('score-confirm').addEventListener('click', () => {
                 const newScore = parseInt(scoreInput.value.trim());
                 if (!isNaN(newScore) && newScore >= 0) {
                     score = newScore;
                     scoreDom.textContent = score;
                     localStorage.setItem('class2048_score', score);
-                    closeModal();
+                    closeScoreModal();
                     alert(`分数修改成功！当前分数：${score}`);
-                } else alert('请输入有效数字（≥0）');
+                } else {
+                    alert('请输入有效数字（≥0）！');
+                }
             });
 
-            document.getElementById('cancel-score').addEventListener('click', closeModal);
-            mask.addEventListener('click', (e) => e.target === mask && closeModal());
+            // 6. 分数修改 - 取消按钮
+            document.getElementById('score-cancel').addEventListener('click', () => {
+                closeScoreModal();
+            });
+
+            // 7. 点击遮罩层：关闭对应弹窗
+            mask.addEventListener('click', (e) => {
+                if (e.target === mask) {
+                    closeAdminModal();
+                    closeScoreModal();
+                }
+            });
+
+            // 8. 重置游戏按钮
+            resetBtn.addEventListener('click', initGame);
         }
 
-        // 关闭分数弹窗
-        function closeModal() {
+        // ========== 辅助函数：关闭管理员弹窗 ==========
+        function closeAdminModal() {
+            adminModal.style.display = 'none';
+            mask.style.display = 'none';
+            adminInput.value = ''; // 清空输入框
+        }
+
+        // ========== 辅助函数：关闭分数弹窗 ==========
+        function closeScoreModal() {
             scoreModal.style.display = 'none';
             mask.style.display = 'none';
+            scoreInput.value = ''; // 清空输入框
+        }
+
+        // ========== 辅助函数：清空所有弹窗输入框 ==========
+        function clearModalInputs() {
+            adminInput.value = '';
             scoreInput.value = '';
         }
     </script>
